@@ -1,0 +1,24 @@
+schema_version: 1
+
+name: "kiegroup/daas-acceptor-service"
+version: "1.0"
+from: "fedora:32"
+description: "The KIE Decision-as-a-Service Acceptor Service"
+
+modules:
+  repositories:
+    - name: "daas-sandbox"
+      git:
+        url: "https://github.com/kiegroup/daas-sandbox.git"
+        ref: "master"
+  install:
+    - name: "nginx"
+      version: "1.0"
+
+ports:
+    - value: 80
+
+run:
+  user: "root"
+  cmd:
+      - "/opt/daas/modules/nginx/launch.sh"

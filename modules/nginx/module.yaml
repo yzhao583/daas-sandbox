@@ -1,0 +1,12 @@
+schema_version: 1
+
+name: "nginx"
+version: "1.0"
+description: "The KIE Decision-as-a-Service nginx module"
+
+packages:
+  install:
+    - nginx
+
+execute:
+  - script: "configure.sh"
