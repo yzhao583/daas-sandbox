@@ -1,0 +1,17 @@
+schema_version: 1
+
+name: "org.kie.daas.packages"
+version: "0.1"
+description: "KIE DaaS packages module"
+
+# TODO: remove unnecessary packages
+#       (procps-ng, vim-minimal, which, ...)
+packages:
+  install:
+    - file
+    - gzip
+    - procps-ng
+    - shadow-utils
+    - tar
+    - vim-minimal
+    - which

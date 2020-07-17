@@ -1,0 +1,8 @@
+schema_version: 1
+
+name: "org.kie.daas.epel"
+version: "7"
+description: "KIE DaaS epel module"
+
+execute:
+  - script: "configure.sh"

@@ -1,0 +1,14 @@
+schema_version: 1
+
+name: "org.kie.daas.user"
+version: "0.1"
+description: "KIE DaaS user module"
+
+envs:
+  - name: "DAAS_HOME"
+    value: "/home/daas"
+  - name: "USER"
+    value: "daas"
+
+execute:
+  - script: "configure.sh"

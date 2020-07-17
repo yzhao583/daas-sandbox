@@ -1,0 +1,18 @@
+schema_version: 1
+
+name: "org.kie.daas.common"
+version: "0.1"
+description: "KIE DaaS common module"
+
+labels:
+  - name: "maintainer"
+    value: "daas <daas@kiegroup.com>"
+
+modules:
+  install:
+    - name: "org.kie.daas.epel"
+      version: "7"
+    - name: "org.kie.daas.packages"
+    - name: "org.kie.daas.user"
+    - name: "org.kie.daas.launch"
+    - name: "org.kie.daas.logging"
