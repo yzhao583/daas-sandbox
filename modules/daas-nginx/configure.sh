@@ -10,7 +10,7 @@ configure() {
 
     local log_dir="/var/log/nginx"
     mkdir -p ${log_dir}
-    chown 1001:0 ${log_dir}
+    chown 1001:1001 ${log_dir}
 }
 
 configure ${@}
