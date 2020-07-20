@@ -2,8 +2,8 @@
 
 set -e
 
-configure() {
+install_module() {
     rpm -i https://download.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 }
 
-configure ${@}
+install_module ${@}

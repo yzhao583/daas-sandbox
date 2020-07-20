@@ -9,6 +9,7 @@ description: "KIE DaaS packages module"
 packages:
   install:
     - file
+    - git
     - gzip
     - procps-ng
     - shadow-utils

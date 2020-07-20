@@ -28,4 +28,4 @@ run:
   workdir: "/home/daas"
   user: 1001
   cmd:
-      - "/home/daas/launch/launch.sh"
+      - "/home/daas/launch/launch-nginx.sh"

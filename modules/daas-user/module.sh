@@ -2,9 +2,9 @@
 
 set -e
 
-configure() {
+install_module() {
     groupadd -r daas -g 1001 && useradd -u 1001 -r -g 1001 -m -d ${DAAS_HOME} -s /sbin/nologin -c "DaaS user" ${USER}
     chown -R 1001:1001 ${DAAS_HOME}
 }
 
-configure ${@}
+install_module ${@}

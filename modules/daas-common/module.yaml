@@ -8,6 +8,11 @@ labels:
   - name: "maintainer"
     value: "daas <daas@kiegroup.com>"
 
+envs:
+- name: "SCRIPT_DEBUG"
+  example: "true"
+  description: "If set to true, ensures that the bash scripts are executed with the -x option, printing the commands and their arguments as they are executed. Also debug JVM initialization."
+
 modules:
   install:
     - name: "org.kie.daas.epel"

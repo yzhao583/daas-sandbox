@@ -5,4 +5,4 @@ version: "7"
 description: "KIE DaaS epel module"
 
 execute:
-  - script: "configure.sh"
+  - script: "module.sh"
