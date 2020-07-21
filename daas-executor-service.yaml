@@ -23,16 +23,14 @@ modules:
         url: "https://github.com/jboss-openshift/cct_module"
         ref: "0.41.0"
   install:
-    - name: "org.kie.daas.common"
-    # - name: "org.kie.daas.openjdk"
-    #   version: "11-devel"
-    - name: "org.kie.daas.graalvm"
+    - name: "org.kie.daas.common.dependencies"
+    - name: "org.kie.daas.java.graalvm"
       version: "20.1.x-ce-java11"
-    - name: "org.kie.daas.maven"
+    - name: "org.kie.daas.java.maven"
       version: "3.6.x"
-    - name: "org.kie.daas.jboss"
+    - name: "org.kie.daas.java.jboss"
     - name: "jboss.container.java.jvm.bash"
-    - name: "org.kie.daas.cleanup"
+    - name: "org.kie.daas.common.cleanup"
 
 run:
   workdir: "/home/daas"

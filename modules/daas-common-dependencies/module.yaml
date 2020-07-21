@@ -1,0 +1,23 @@
+schema_version: 1
+
+name: "org.kie.daas.common.dependencies"
+version: "0.1"
+description: "KIE DaaS common dependencies module"
+
+labels:
+  - name: "maintainer"
+    value: "daas <daas@kiegroup.com>"
+
+envs:
+- name: "SCRIPT_DEBUG"
+  example: "true"
+  description: "If set to true, ensures that the bash scripts are executed with the -x option, printing the commands and their arguments as they are executed. Also debug JVM initialization."
+
+modules:
+  install:
+    - name: "org.kie.daas.system.epel"
+      version: "7"
+    - name: "org.kie.daas.system.packages"
+    - name: "org.kie.daas.system.user"
+    - name: "org.kie.daas.scripts.launch"
+    - name: "org.kie.daas.scripts.logging"

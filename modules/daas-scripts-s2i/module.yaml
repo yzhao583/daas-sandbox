@@ -1,0 +1,16 @@
+schema_version: 1
+
+name: "org.kie.daas.scripts.s2i"
+version: "0.1"
+description: "KIE DaaS scripts s2i module"
+
+labels:
+  - name: "io.openshift.s2i.scripts-url"
+    value: "image:///usr/local/s2i"
+  - name: "io.openshift.s2i.destination"
+    value: "/tmp"
+
+run:
+  user: 1001
+  cmd:
+    - "/usr/local/s2i/run"

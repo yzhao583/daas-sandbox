@@ -1,0 +1,14 @@
+schema_version: 1
+
+name: "org.kie.daas.java.jboss"
+version: "0.1"
+description: "KIE DaaS java jboss module"
+
+envs:
+  - name: "JBOSS_HOME"
+    value: "/home/jboss"
+  - name: "USER"
+    value: "jboss"
+
+execute:
+  - script: "module.sh"

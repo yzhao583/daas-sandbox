@@ -1,8 +1,0 @@
-schema_version: 1
-
-name: "org.kie.daas.logging"
-version: "0.1"
-description: "KIE DaaS logging module"
-
-execute:
-  - script: "module.sh"

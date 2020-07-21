@@ -20,14 +20,12 @@ modules:
   repositories:
     - path: "modules"
   install:
-    - name: "org.kie.daas.common"
-    # - name: "org.kie.daas.nginx"
-    - name: "org.kie.daas.httpd"
-    - name: "org.kie.daas.cleanup"
+    - name: "org.kie.daas.common.dependencies"
+    - name: "org.kie.daas.www.httpd"
+    - name: "org.kie.daas.common.cleanup"
 
 run:
   workdir: "/root"
   user: root
   cmd:
-      # - "/home/daas/launch/launch-nginx.sh"
       - "/home/daas/launch/launch-httpd.sh"
