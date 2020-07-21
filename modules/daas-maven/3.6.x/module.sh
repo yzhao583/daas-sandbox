@@ -16,7 +16,7 @@ install_module() {
     tar xzf ${artifacts_dir}/apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /usr/share
     ln -s /usr/share/apache-maven-${MAVEN_VERSION} /usr/share/maven
 
-    echo 'export PATH="${PATH}:/usr/share/maven/bin"' >> ${DAAS_HOME}/.bashrc
+    echo 'export PATH="/usr/share/maven/bin:${PATH}"' >> ${DAAS_HOME}/.bashrc
 }
 
 install_module ${@}

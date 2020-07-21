@@ -14,11 +14,11 @@ labels:
     value: "daas,acceptor-service"
 
 packages:
-  manager: microdnf
+  manager: "microdnf"
 
 modules:
   repositories:
-    - path: modules
+    - path: "modules"
   install:
     - name: "org.kie.daas.common"
     # - name: "org.kie.daas.nginx"

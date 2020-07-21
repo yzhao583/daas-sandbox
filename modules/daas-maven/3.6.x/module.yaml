@@ -2,7 +2,7 @@ schema_version: 1
 
 name: "org.kie.daas.maven"
 version: "3.6.x"
-description: "KIE DaaS maven module"
+description: "KIE DaaS maven 3.6.x module"
 
 envs:
   - name: "MAVEN_VERSION"

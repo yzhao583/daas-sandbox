@@ -5,10 +5,11 @@ version: "0.1"
 description: "KIE DaaS packages module"
 
 # TODO: remove unnecessary packages
-#       (procps-ng, vim-minimal, which, ...)
+#       (findutils, procps-ng, vim-minimal, which, ...)
 packages:
   install:
     - file
+    - findutils
     - git
     - gzip
     - procps-ng

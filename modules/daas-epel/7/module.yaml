@@ -2,7 +2,7 @@ schema_version: 1
 
 name: "org.kie.daas.epel"
 version: "7"
-description: "KIE DaaS epel module"
+description: "KIE DaaS epel 7 module"
 
 execute:
   - script: "module.sh"

@@ -14,17 +14,24 @@ labels:
     value: "daas,executor-service"
 
 packages:
-  manager: microdnf
+  manager: "microdnf"
 
 modules:
   repositories:
-    - path: modules
+    - path: "modules"
+    - git:
+        url: "https://github.com/jboss-openshift/cct_module"
+        ref: "0.41.0"
   install:
     - name: "org.kie.daas.common"
-    - name: "org.kie.daas.openjdk"
-      version: "11-devel"
+    # - name: "org.kie.daas.openjdk"
+    #   version: "11-devel"
+    - name: "org.kie.daas.graalvm"
+      version: "20.1.x-ce-java11"
     - name: "org.kie.daas.maven"
       version: "3.6.x"
+    - name: "org.kie.daas.jboss"
+    - name: "jboss.container.java.jvm.bash"
     - name: "org.kie.daas.cleanup"
 
 run:

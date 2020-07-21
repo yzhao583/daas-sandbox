@@ -2,7 +2,7 @@ schema_version: 1
 
 name: "org.kie.daas.openjdk"
 version: "11-headless"
-description: "KIE DaaS openjdk 11 headless module"
+description: "KIE DaaS openjdk 11-headless module"
 
 labels:
   - name: "org.jboss.product.openjdk.version"
