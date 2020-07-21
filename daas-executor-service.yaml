@@ -23,7 +23,7 @@ modules:
         url: "https://github.com/jboss-openshift/cct_module"
         ref: "0.41.0"
   install:
-    - name: "org.kie.daas.common.dependencies"
+    - name: "org.kie.daas.common.modules"
     - name: "org.kie.daas.java.openjdk"
       version: "11-devel"
     - name: "org.kie.daas.java.maven"

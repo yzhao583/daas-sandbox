@@ -1,8 +1,8 @@
 schema_version: 1
 
-name: "org.kie.daas.common.dependencies"
+name: "org.kie.daas.common.modules"
 version: "0.1"
-description: "KIE DaaS common dependencies module"
+description: "KIE DaaS common modules module"
 
 labels:
   - name: "maintainer"
