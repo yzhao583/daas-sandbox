@@ -14,9 +14,8 @@ fi
 # config (any configurations script that needs to run on image startup must be added here)
 # CONFIGURE_SCRIPTS=(
 # )
-# source ${KOGITO_HOME}/launch/configure.sh
+# source ${DAAS_HOME}/launch/configure.sh
 #############################################
 
-log_info "Launching NGINX..."
-
+log_info "Launching nginx..."
 /usr/sbin/nginx -c ${DAAS_HOME}/launch/nginx.conf

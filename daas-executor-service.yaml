@@ -24,16 +24,17 @@ modules:
         ref: "0.41.0"
   install:
     - name: "org.kie.daas.common.dependencies"
-    - name: "org.kie.daas.java.graalvm"
-      version: "20.1.x-ce-java11"
+    - name: "org.kie.daas.java.openjdk"
+      version: "11-devel"
     - name: "org.kie.daas.java.maven"
       version: "3.6.x"
     - name: "org.kie.daas.java.jboss"
-    - name: "jboss.container.java.jvm.bash"
+    - name: "dynamic-resources"
+    - name: "org.kie.daas.service.executor"
     - name: "org.kie.daas.common.cleanup"
 
 run:
   workdir: "/home/daas"
   user: 1001
   cmd:
-      - "/home/daas/launch/launch-placeholder.sh"
+      - "/home/daas/launch/launch-executor.sh"

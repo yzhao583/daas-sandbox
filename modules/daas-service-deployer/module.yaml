@@ -1,0 +1,8 @@
+schema_version: 1
+
+name: "org.kie.daas.service.deployer"
+version: "0.1"
+description: "KIE DaaS service deployer module"
+
+execute:
+  - script: "module.sh"

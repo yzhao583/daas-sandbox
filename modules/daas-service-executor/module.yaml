@@ -1,0 +1,8 @@
+schema_version: 1
+
+name: "org.kie.daas.service.executor"
+version: "0.1"
+description: "KIE DaaS service executor module"
+
+execute:
+  - script: "module.sh"

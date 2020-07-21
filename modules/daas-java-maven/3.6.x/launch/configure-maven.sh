@@ -25,7 +25,7 @@ function configure() {
     configure_proxy
     configure_mirrors
     configure_maven_download_output
-    set_kogito_maven_repo
+    set_daas_maven_repo
     add_maven_repo
 }
 
@@ -92,10 +92,10 @@ function configure_maven_download_output() {
     fi
 }
 
-function set_kogito_maven_repo() {
-    local kogito_maven_repo_url="${JBOSS_MAVEN_REPO_URL}"
-    if [ -n "${kogito_maven_repo_url}" ]; then
-        sed -i "s|https://repository.jboss.org/nexus/content/groups/public/|${kogito_maven_repo_url}|" $HOME/.m2/settings.xml
+function set_daas_maven_repo() {
+    local daas_maven_repo_url="${JBOSS_MAVEN_REPO_URL}"
+    if [ -n "${daas_maven_repo_url}" ]; then
+        sed -i "s|https://repository.jboss.org/nexus/content/groups/public/|${daas_maven_repo_url}|" $HOME/.m2/settings.xml
     fi
 }
 

@@ -13,10 +13,8 @@ fi
 
 # config (any configurations script that needs to run on image startup must be added here)
 # CONFIGURE_SCRIPTS=(
-#     ${DAAS_HOME}/launch/configure-foo.sh
-#     ${DAAS_HOME}/launch/configure-bar.sh
 # )
-# source ${KOGITO_HOME}/launch/configure.sh
+# source ${DAAS_HOME}/launch/configure.sh
 #############################################
 
 log_info "Launching placeholder (while-true-sleep loop)..."
