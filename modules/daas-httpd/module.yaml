@@ -1,0 +1,19 @@
+schema_version: 1
+
+name: "org.kie.daas.httpd"
+version: "0.1"
+description: "KIE DaaS httpd module"
+
+labels:
+  - name: "io.openshift.expose-services"
+    value: "8080:http"
+
+packages:
+  install:
+    - httpd
+
+ports:
+    - value: 8080
+
+execute:
+  - script: "module.sh"
