@@ -1,0 +1,74 @@
+kind: ImageStreamList
+apiVersion: v1
+metadata:
+  name: daas-image-streams
+  annotations:
+    description: ImageStream definitions for DaaS 0.1
+    openshift.io/provider-display-name: 'Red Hat, Inc.'
+items:
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: daas-acceptor-ubi8
+      annotations:
+        openshift.io/display-name: DaaS Acceptor 0.1
+        openshift.io/provider-display-name: 'Red Hat, Inc.'
+        openshift.io/image.insecureRepository: 'true'
+    spec:
+      tags:
+        - name: '0.1'
+          annotations:
+            description: DaaS 0.1 Acceptor image
+            iconClass: icon-jboss
+            tags: daas
+            supports: 'daas:0.1'
+            version: '0.1'
+          from:
+            kind: DockerImage
+            name: '172.30.1.1:5000/kiegroup/daas-acceptor-ubi8:0.1'
+          importPolicy:
+            insecure: true
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: daas-deployer-ubi8
+      annotations:
+        openshift.io/display-name: DaaS Deployer 0.1
+        openshift.io/provider-display-name: 'Red Hat, Inc.'
+        openshift.io/image.insecureRepository: 'true'
+    spec:
+      tags:
+        - name: '0.1'
+          annotations:
+            description: DaaS 0.1 Deployer image
+            iconClass: icon-jboss
+            tags: daas
+            supports: 'daas:0.1'
+            version: '0.1'
+          from:
+            kind: DockerImage
+            name: '172.30.1.1:5000/kiegroup/daas-deployer-ubi8:0.1'
+          importPolicy:
+            insecure: true
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: daas-executor-ubi8
+      annotations:
+        openshift.io/display-name: DaaS Executor 0.1
+        openshift.io/provider-display-name: 'Red Hat, Inc.'
+        openshift.io/image.insecureRepository: 'true'
+    spec:
+      tags:
+        - name: '0.1'
+          annotations:
+            description: DaaS 0.1 Executor image
+            iconClass: icon-jboss
+            tags: daas
+            supports: 'daas:0.1'
+            version: '0.1'
+          from:
+            kind: DockerImage
+            name: '172.30.1.1:5000/kiegroup/daas-executor-ubi8:0.1'
+          importPolicy:
+            insecure: true

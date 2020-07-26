@@ -9,9 +9,9 @@ usage() {
     echo ""
     echo "  Usage: image.sh [name] [action] [engine] [port]"
     echo ""
-    echo "   name: the service name"
+    echo "   name: the (abbreviated) image name"
     echo " action: can be one of... build, shell, run, kill"
-    echo " engine: default is buildah"
+    echo " engine: for build action, default is 'buildah'; for shell, run, or kill actions, default is 'podman'"
     echo "   port: default is 8080 for acceptor, otherwise empty"
     echo ""
     echo "Example: ./image.sh acceptor build"
@@ -21,53 +21,64 @@ usage() {
 main() {
     pushd "${SCRIPT_DIR}" &> /dev/null
 
-    local service="${1}"
+    local name="${1}"
     local action="${2}"
-    local engine="${3:-buildah}"
-    local port=""
+    local engine="${3}"
+    local port="${4}"
 
-    if [ "${service}" = "" ]; then
-        echo "service name required"
+    # local version="latest"
+    local version="0.1"
+
+    if [ "${name}" = "" ]; then
+        echo "name required"
         usage
         return 1
-    elif [ "${service}" = "acceptor" ] && [ "${port}" = "" ] ; then
+    elif [ "${name}" = "acceptor" ] && [ "${port}" = "" ] ; then
         port="8080"
     fi
 
-    local service_name="daas-${service}-service"
-    local image_name="quay.io/kiegroup/${service_name}:latest"
+    name="daas-${name}-ubi8"
+    local image="quay.io/kiegroup/${name}:${version}"
 
-    local desc_file="${SCRIPT_DIR}/${service_name}.yaml"
+    local desc_file="${SCRIPT_DIR}/${name}.yaml"
     if [ ! -f "${desc_file}" ]; then
         echo "image descriptor file '${desc_file}' does not exist"
         usage
         return 1
     fi
 
-    local target_dir="${SCRIPT_DIR}/target/${service_name}"
+    local target_dir="${SCRIPT_DIR}/target/${name}"
     mkdir -p "${target_dir}"
+
+    if [ "${engine}" = "" ]; then
+        if [ "${action}" = "build" ]; then
+            engine="buildah"
+        else
+            engine="podman"
+        fi
+    fi
 
     if [ "${action}" = "build" ]; then
         cekit -v --descriptor "${desc_file}" --target "${target_dir}" build "${engine}"
     elif [ "${action}" = "shell" ]; then
         if [ "${port}" = "" ]; then
-            podman run -it --rm "${image_name}" /bin/bash
+            ${engine} run -it --rm "${image}" /bin/bash
         else
-            podman run -it -p ${port}:${port} --rm "${image_name}" /bin/bash
+            ${engine} run -it -p ${port}:${port} --rm "${image}" /bin/bash
         fi
     elif [ "${action}" = "run" ]; then
         mkdir -p "${target_dir}"
         if [ "${port}" = "" ]; then
-            podman run -dit --rm "${image_name}" > "${target_dir}/image.cid"
+            ${engine} run -dit --rm "${image}" > "${target_dir}/image.cid"
         else
-            podman run -dit -p ${port}:${port} --rm "${image_name}" > "${target_dir}/image.cid"
+            ${engine} run -dit -p ${port}:${port} --rm "${image}" > "${target_dir}/image.cid"
         fi
         cat "${target_dir}/image.cid"
     elif [ "${action}" = "kill" ]; then
         if [ -f "${target_dir}/image.cid" ]; then
-            podman kill $(cat "${target_dir}/image.cid")
+            ${engine} kill $(cat "${target_dir}/image.cid")
         else
-            echo "container id file '${target_dir}/image.cid' for image '${image_name}' does not exist"
+            echo "container id file '${target_dir}/image.cid' for image '${image}' does not exist"
             return 1
         fi
     else

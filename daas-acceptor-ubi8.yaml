@@ -1,0 +1,31 @@
+schema_version: 1
+
+name: quay.io/kiegroup/daas-acceptor-ubi8
+from: 'registry.access.redhat.com/ubi8/ubi-minimal:8.0'
+version: '0.1'
+description: KIE DaaS Acceptor
+
+labels:
+  - name: io.k8s.display-name
+    value: KIE DaaS Acceptor
+  - name: io.k8s.description
+    value: KIE DaaS Acceptor
+  - name: io.openshift.tags
+    value: 'daas,acceptor'
+
+packages:
+  manager: microdnf
+
+modules:
+  repositories:
+    - path: modules
+  install:
+    - name: org.kie.daas.common.modules
+    - name: org.kie.daas.www.httpd
+    - name: org.kie.daas.common.cleanup
+
+run:
+  workdir: /home/daas
+  user: 1001
+  cmd:
+    - /home/daas/launch/launch-httpd.sh

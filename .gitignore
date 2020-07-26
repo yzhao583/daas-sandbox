@@ -6,3 +6,7 @@ cache/
 
 # Log files
 *.log
+
+# Developer scratch files
+my*.json
+my*.yaml
