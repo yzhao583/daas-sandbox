@@ -12,9 +12,10 @@ if [ "${SCRIPT_DEBUG}" = "true" ] ; then
 fi
 
 # config (any configurations script that needs to run on image startup must be added here)
-# CONFIGURE_SCRIPTS=(
-# )
-# source ${DAAS_HOME}/launch/configure.sh
+CONFIGURE_SCRIPTS=(
+    ${DAAS_HOME}/launch/configure-user.sh
+)
+source ${DAAS_HOME}/launch/configure.sh
 #############################################
 
 log_info "Launching httpd..."

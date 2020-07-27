@@ -4,5 +4,9 @@ name: "org.kie.daas.service.executor"
 version: "0.1"
 description: "KIE DaaS service executor module"
 
+labels:
+  - name: "io.openshift.expose-services"
+    value: "8080:http"
+
 execute:
   - script: "module.sh"

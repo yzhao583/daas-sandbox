@@ -7,6 +7,10 @@ description: "KIE DaaS system user module"
 envs:
   - name: "DAAS_HOME"
     value: "/home/daas"
+  - name: "HOME"
+    value: "/home/daas"
+  - name: "DAAS_USER"
+    value: "daas"
   - name: "USER"
     value: "daas"
 

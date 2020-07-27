@@ -11,8 +11,7 @@ install_module() {
     local m2_dir="${DAAS_HOME}/.m2"
     mkdir -p ${m2_dir}/repository
     cp -v -r ${SCRIPT_DIR}/m2/* ${m2_dir}
-    chown -R 1001:1001 ${m2_dir}
-    chmod -R 777 ${m2_dir}
+    chown -R 1001:0 ${m2_dir} && chmod -R ug+rwx ${m2_dir}
 
     local artifacts_dir="/tmp/artifacts"
     tar xzf ${artifacts_dir}/apache-maven-${MAVEN_VERSION}-bin.tar.gz -C /usr/share

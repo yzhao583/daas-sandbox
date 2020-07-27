@@ -13,7 +13,7 @@ install_module() {
 
     local log_dir="/var/log/nginx"
     mkdir -p ${log_dir}
-    chown 1001:1001 ${log_dir}
+    chown -R 1001:0 ${log_dir} && chmod -R ug+rwx ${log_dir}
 }
 
 install_module ${@}

@@ -15,6 +15,7 @@ fi
 
 # config (any configurations script that needs to run on image startup must be added here)
 CONFIGURE_SCRIPTS=(
+    ${DAAS_HOME}/launch/configure-user.sh
     ${DAAS_HOME}/launch/configure-maven.sh
     /opt/run-java/proxy-options
 )
@@ -24,8 +25,9 @@ source ${DAAS_HOME}/launch/configure.sh
 
 # for JVM property settings please refer to this link:
 # https://github.com/jboss-openshift/cct_module/blob/master/jboss/container/java/jvm/api/module.yaml
-source /usr/local/dynamic-resources/dynamic_resources.sh
-JAVA_OPTS="$(adjust_java_options ${JAVA_OPTS})"
+# source /usr/local/dynamic-resources/dynamic_resources.sh
+# JAVA_OPTS="$(adjust_java_options ${JAVA_OPTS})"
+# log_debug "exec ${JAVA_HOME}/bin/java ${SHOW_JVM_SETTINGS} ${JAVA_OPTS} ${JAVA_OPTS_APPEND} ${JAVA_PROXY_OPTIONS} ${DAAS_OPTS} -jar /path/to/todo.jar"
 
 #############################################
 
@@ -87,6 +89,7 @@ EOF
         dependency:go-offline \
         clean \
         compile \
+        package \
         -f pom.xml \
         -s ${m2_dir}/settings.xml \
         --batch-mode \
@@ -102,11 +105,6 @@ EOF
         -Dmaven.test.skip \
         -Dpmd.skip=true \
         -DskipTests
-
-    for ch_dir in ${apps_dir} ${m2_dir} ; do
-        chown -R 1001:1001 ${ch_dir}
-        chmod -R 777 ${ch_dir}
-    done
 }
 
 run_executor() {
@@ -123,10 +121,8 @@ run_executor() {
     fi
     cd ${webdav_app_dir}
 
-    # DAAS_OPTS=""
-    # log_debug "exec ${JAVA_HOME}/bin/java ${SHOW_JVM_SETTINGS} ${JAVA_OPTS} ${JAVA_OPTS_APPEND} ${JAVA_PROXY_OPTIONS} ${DAAS_OPTS} -jar /path/to/todo.jar"
-
     mvn -e \
+        compile \
         quarkus:dev \
         -f pom.xml \
         -s ${m2_dir}/settings.xml \
