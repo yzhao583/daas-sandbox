@@ -44,13 +44,6 @@ parameters:
       'daas-acceptor-ubi8'.
     value: daas-acceptor-ubi8
     required: true
-  - name: DAAS_DEPLOYER_IMAGE_STREAM_NAME
-    displayName: DaaS Deployer ImageStream Name
-    description: >-
-      The name of the image stream to use for DaaS Deployer. Default is
-      'daas-deployer-ubi8'.
-    value: daas-deployer-ubi8
-    required: true
   - name: DAAS_EXECUTOR_IMAGE_STREAM_NAME
     displayName: DaaS Executor ImageStream Name
     description: >-
@@ -58,19 +51,19 @@ parameters:
       'daas-executor-ubi8'.
     value: daas-executor-ubi8
     required: true
+  - name: DAAS_EXECUTOR_S2I_IMAGE_STREAM_NAME
+    displayName: DaaS Executor S2I ImageStream Name
+    description: >-
+      The name of the image stream to use for DaaS Executor S2I. Default is
+      'daas-executor-ubi8-s2i'.
+    value: daas-executor-ubi8-s2i
+    required: true
   - name: DAAS_ACCEPTOR_HOSTNAME_HTTP
     displayName: Daas Acceptor Custom http Route Hostname
     description: >-
       Custom hostname for DaaS acceptor http service route. Leave blank for
       default hostname, e.g.:
       '<application-name>-acceptor-<project>.<default-domain-suffix>'
-    value: ''
-  - name: DAAS_DEPLOYER_HOSTNAME_HTTP
-    displayName: Daas Deployer Custom http Route Hostname
-    description: >-
-      Custom hostname for DaaS deployer http service route. Leave blank for
-      default hostname, e.g.:
-      '<application-name>-deployer-<project>.<default-domain-suffix>'
     value: ''
   - name: DAAS_EXECUTOR_HOSTNAME_HTTP
     displayName: Daas Executor Custom http Route Hostname
@@ -89,6 +82,17 @@ parameters:
     displayName: WebDAV Volume Capacity
     description: Size of persistent storage for the WebDAV volume.
     value: 1Gi
+    required: true
+  - name: MAVEN_MIRROR_URL
+    displayName: Maven Mirror URL
+    description: URL pointing to a Maven Mirror to help speed up builds.
+    value: >-
+      http://nexus3-kogito-tools.apps.kogito.automation.rhmw.io/repository/maven-public
+    required: false
+  - name: KOGITO_VERSION
+    displayName: Kogito Version
+    description: The version of Kogito.
+    value: 0.12.0
     required: true
   - name: SCRIPT_DEBUG
     displayName: Script Debug
@@ -141,26 +145,6 @@ objects:
           port: 8080
           targetPort: 8080
       selector:
-        deploymentConfig: '${APPLICATION_NAME}-daas-deployer'
-      sessionAffinity: ClientIP
-      sessionAffinityConfig:
-        clientIP:
-          timeoutSeconds: 3600
-    metadata:
-      name: '${APPLICATION_NAME}-daas-deployer'
-      labels:
-        application: '${APPLICATION_NAME}'
-        service: '${APPLICATION_NAME}-daas-deployer'
-      annotations:
-        description: The DaaS deployer web server ports.
-  - kind: Service
-    apiVersion: v1
-    spec:
-      ports:
-        - name: http
-          port: 8080
-          targetPort: 8080
-      selector:
         deploymentConfig: '${APPLICATION_NAME}-daas-executor'
       sessionAffinity: ClientIP
       sessionAffinityConfig:
@@ -192,23 +176,6 @@ objects:
         targetPort: http
   - kind: Route
     apiVersion: v1
-    id: '${APPLICATION_NAME}-daas-deployer-http'
-    metadata:
-      name: '${APPLICATION_NAME}-daas-deployer'
-      labels:
-        application: '${APPLICATION_NAME}'
-        service: '${APPLICATION_NAME}-daas-deployer'
-      annotations:
-        description: Route for DaaS deployer's http service.
-        haproxy.router.openshift.io/balance: source
-    spec:
-      host: '${DAAS_ACCEPTOR_HOSTNAME_HTTP}'
-      to:
-        name: '${APPLICATION_NAME}-daas-deployer'
-      port:
-        targetPort: http
-  - kind: Route
-    apiVersion: v1
     id: '${APPLICATION_NAME}-daas-executor-http'
     metadata:
       name: '${APPLICATION_NAME}-daas-executor'
@@ -224,6 +191,49 @@ objects:
         name: '${APPLICATION_NAME}-daas-executor'
       port:
         targetPort: http
+  - kind: ImageStream
+    apiVersion: v1
+    metadata:
+      name: '${DAAS_EXECUTOR_IMAGE_STREAM_NAME}'
+      labels:
+        application: '${APPLICATION_NAME}'
+        service: '${APPLICATION_NAME}-daas-executor'
+  - kind: BuildConfig
+    apiVersion: v1
+    metadata:
+      name: '${DAAS_EXECUTOR_IMAGE_STREAM_NAME}'
+      labels:
+        application: '${APPLICATION_NAME}'
+        service: '${APPLICATION_NAME}-daas-executor'
+      annotations:
+        template.alpha.openshift.io/wait-for-ready: 'true'
+    spec:
+      strategy:
+        type: Source
+        sourceStrategy:
+          env:
+            - name: APPLICATION_NAME
+              value: '${APPLICATION_NAME}'
+            - name: KOGITO_VERSION
+              value: '${KOGITO_VERSION}'
+            - name: MAVEN_MIRROR_URL
+              value: '${MAVEN_MIRROR_URL}'
+            - name: SCRIPT_DEBUG
+              value: '${SCRIPT_DEBUG}'
+          forcePull: true
+          from:
+            kind: ImageStreamTag
+            namespace: '${IMAGE_STREAM_NAMESPACE}'
+            name: '${DAAS_EXECUTOR_S2I_IMAGE_STREAM_NAME}:${IMAGE_STREAM_TAG}'
+      output:
+        to:
+          kind: ImageStreamTag
+          namespace: '${IMAGE_STREAM_NAMESPACE}'
+          name: '${DAAS_EXECUTOR_IMAGE_STREAM_NAME}:latest'
+      triggers:
+        - type: ImageChange
+          imageChange: {}
+        - type: ConfigChange
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
@@ -266,22 +276,86 @@ objects:
           terminationGracePeriodSeconds: 60
           containers:
             - name: '${APPLICATION_NAME}-daas-acceptor'
-              image: '${APPLICATION_NAME}-daas-acceptor'
+              image: '${DAAS_ACCEPTOR_IMAGE_STREAM_NAME}'
               imagePullPolicy: Always
               ports:
                 - name: http
                   containerPort: 8080
                   protocol: TCP
               env:
-                - name: WEBDAV_MOUNT_PATH
-                  value: '${WEBDAV_MOUNT_PATH}'
                 - name: SCRIPT_DEBUG
                   value: '${SCRIPT_DEBUG}'
+                - name: WEBDAV_MOUNT_PATH
+                  value: '${WEBDAV_MOUNT_PATH}'
               volumeMounts:
-                - name: '${APPLICATION_NAME}-daas-acceptor-pvol'
+                - name: '${APPLICATION_NAME}-daas-webdav-pvol'
                   mountPath: '${WEBDAV_MOUNT_PATH}'
           volumes:
-            - name: '${APPLICATION_NAME}-daas-acceptor-pvol'
+            - name: '${APPLICATION_NAME}-daas-webdav-pvol'
+              persistentVolumeClaim:
+                claimName: '${APPLICATION_NAME}-daas-webdav-claim'
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: '${APPLICATION_NAME}-daas-executor'
+      labels:
+        application: '${APPLICATION_NAME}'
+        service: '${APPLICATION_NAME}-daas-executor'
+      annotations:
+        template.alpha.openshift.io/wait-for-ready: 'true'
+    spec:
+      revisionHistoryLimit: 10
+      strategy:
+        type: Rolling
+        rollingParams:
+          maxSurge: 100%
+          maxUnavailable: 0
+      triggers:
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - '${APPLICATION_NAME}-daas-executor'
+            from:
+              kind: ImageStream
+              namespace: '${IMAGE_STREAM_NAMESPACE}'
+              name: '${DAAS_EXECUTOR_IMAGE_STREAM_NAME}'
+        - type: ConfigChange
+      replicas: 1
+      selector:
+        deploymentConfig: '${APPLICATION_NAME}-daas-executor'
+      template:
+        metadata:
+          name: '${APPLICATION_NAME}-daas-executor'
+          labels:
+            deploymentConfig: '${APPLICATION_NAME}-daas-executor'
+            application: '${APPLICATION_NAME}'
+            service: '${APPLICATION_NAME}-daas-executor'
+        spec:
+          serviceAccountName: '${APPLICATION_NAME}-daas-svcacct'
+          terminationGracePeriodSeconds: 60
+          containers:
+            - name: '${APPLICATION_NAME}-daas-executor'
+              image: '${DAAS_EXECUTOR_IMAGE_STREAM_NAME}'
+              imagePullPolicy: Always
+              ports:
+                - name: http
+                  containerPort: 8080
+                  protocol: TCP
+              env:
+                - name: APPLICATION_NAME
+                  value: '${APPLICATION_NAME}'
+                - name: MAVEN_MIRROR_URL
+                  value: '${MAVEN_MIRROR_URL}'
+                - name: SCRIPT_DEBUG
+                  value: '${SCRIPT_DEBUG}'
+                - name: WEBDAV_MOUNT_PATH
+                  value: '${WEBDAV_MOUNT_PATH}'
+              volumeMounts:
+                - name: '${APPLICATION_NAME}-daas-webdav-pvol'
+                  mountPath: '${WEBDAV_MOUNT_PATH}'
+          volumes:
+            - name: '${APPLICATION_NAME}-daas-webdav-pvol'
               persistentVolumeClaim:
                 claimName: '${APPLICATION_NAME}-daas-webdav-claim'
   - kind: PersistentVolumeClaim

@@ -7,7 +7,7 @@ install_module() {
     rm -rf /var/cache/yum
 
     chown -R 1001:1001 ${DAAS_HOME}
-    chmod -R 755 ${DAAS_HOME}
+    chmod -R 777 ${DAAS_HOME}
 }
 
 install_module ${@}

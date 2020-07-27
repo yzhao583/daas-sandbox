@@ -7,7 +7,7 @@ description: "KIE DaaS java jboss module"
 envs:
   - name: "JBOSS_HOME"
     value: "/home/jboss"
-  - name: "USER"
+  - name: "JBOSS_USER"
     value: "jboss"
 
 execute:

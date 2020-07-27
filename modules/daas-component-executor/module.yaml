@@ -1,8 +1,0 @@
-schema_version: 1
-
-name: "org.kie.daas.component.executor"
-version: "0.1"
-description: "KIE DaaS component executor module"
-
-execute:
-  - script: "module.sh"

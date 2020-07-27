@@ -1,17 +1,21 @@
 schema_version: 1
 
-name: quay.io/kiegroup/daas-deployer-ubi8
+name: quay.io/kiegroup/daas-executor-ubi8-s2i
 from: 'registry.access.redhat.com/ubi8/ubi-minimal:8.0'
 version: '0.1'
-description: KIE DaaS Deployer
+description: KIE DaaS Executor S2I
 
 labels:
   - name: io.k8s.display-name
-    value: KIE DaaS Deployer
+    value: KIE DaaS Executor S2I
   - name: io.k8s.description
-    value: KIE DaaS Deployer
+    value: KIE DaaS Executor S2I
   - name: io.openshift.tags
-    value: 'daas,deployer'
+    value: 'daas,executor'
+  - name: io.openshift.s2i.scripts-url
+    value: 'image:///home/daas/s2i'
+  - name: io.openshift.s2i.destination
+    value: /tmp
 
 packages:
   manager: microdnf
@@ -30,11 +34,11 @@ modules:
       version: 3.6.x
     - name: org.kie.daas.java.jboss
     - name: dynamic-resources
-    - name: org.kie.daas.component.deployer
+    - name: org.kie.daas.service.executor
     - name: org.kie.daas.common.cleanup
 
 run:
   workdir: /home/daas
   user: 1001
   cmd:
-    - /home/daas/launch/launch-deployer.sh
+    - /home/daas/launch/launch-executor.sh

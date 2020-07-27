@@ -38,6 +38,9 @@ main() {
     fi
 
     name="daas-${name}-ubi8"
+    if [[ ${name} =~ .*executor.* ]]; then
+        name="${name}-s2i"
+    fi
     local image="quay.io/kiegroup/${name}:${version}"
 
     local desc_file="${SCRIPT_DIR}/${name}.yaml"
@@ -58,29 +61,32 @@ main() {
         fi
     fi
 
+    local cmd=""
     if [ "${action}" = "build" ]; then
-        cekit -v --descriptor "${desc_file}" --target "${target_dir}" build "${engine}"
+        cmd="cekit -v --descriptor ${desc_file} --target ${target_dir} build ${engine}"
     elif [ "${action}" = "shell" ]; then
         if [ "${port}" = "" ]; then
-            ${engine} run -it --rm "${image}" /bin/bash
+            cmd="${engine} run -it --rm ${image} /bin/bash"
         else
-            ${engine} run -it -p ${port}:${port} --rm "${image}" /bin/bash
+            cmd="${engine} run -it -p ${port}:${port} --rm ${image} /bin/bash"
         fi
     elif [ "${action}" = "run" ]; then
         mkdir -p "${target_dir}"
         if [ "${port}" = "" ]; then
-            ${engine} run -dit --rm "${image}" > "${target_dir}/image.cid"
+            cmd="${engine} run -dit --rm ${image} > ${target_dir}/image.cid"
         else
-            ${engine} run -dit -p ${port}:${port} --rm "${image}" > "${target_dir}/image.cid"
+            cmd="${engine} run -dit -p ${port}:${port} --rm ${image} > ${target_dir}/image.cid"
         fi
-        cat "${target_dir}/image.cid"
     elif [ "${action}" = "kill" ]; then
         if [ -f "${target_dir}/image.cid" ]; then
-            ${engine} kill $(cat "${target_dir}/image.cid")
+            cmd="${engine} kill $(cat ${target_dir}/image.cid)"
         else
             echo "container id file '${target_dir}/image.cid' for image '${image}' does not exist"
-            return 1
         fi
+    fi
+    if [ "x${cmd}" != "x" ]; then
+        echo "${cmd}"
+        eval "${cmd}"
     else
         echo "unrecognized action"
         usage

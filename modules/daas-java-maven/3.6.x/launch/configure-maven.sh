@@ -70,7 +70,7 @@ function configure_proxy() {
         fi
         xml="$xml\
        </proxy>"
-        sed -i "s|<!-- ### configured http proxy ### -->|${xml}|" $HOME/.m2/settings.xml
+        sed -i "s|<!-- ### configured http proxy ### -->|${xml}|" ${DAAS_HOME}/.m2/settings.xml
     fi
 }
 
@@ -82,7 +82,7 @@ function configure_mirrors() {
       <url>$MAVEN_MIRROR_URL</url>\
       <mirrorOf>external:*</mirrorOf>\
     </mirror>"
-        sed -i "s|<!-- ### configured mirrors ### -->|$xml|" $HOME/.m2/settings.xml
+        sed -i "s|<!-- ### configured mirrors ### -->|$xml|" ${DAAS_HOME}/.m2/settings.xml
     fi
 }
 
@@ -95,7 +95,7 @@ function configure_maven_download_output() {
 function set_daas_maven_repo() {
     local daas_maven_repo_url="${JBOSS_MAVEN_REPO_URL}"
     if [ -n "${daas_maven_repo_url}" ]; then
-        sed -i "s|https://repository.jboss.org/nexus/content/groups/public/|${daas_maven_repo_url}|" $HOME/.m2/settings.xml
+        sed -i "s|https://repository.jboss.org/nexus/content/groups/public/|${daas_maven_repo_url}|" ${DAAS_HOME}/.m2/settings.xml
     fi
 }
 
@@ -154,7 +154,7 @@ function _add_maven_repo() {
                     </snapshots>\n\
                 </repository>\n\
                 <!-- ### configured repositories ### -->"
-    sed -i "s|<!-- ### configured repositories ### -->|${repo}|" $HOME/.m2/settings.xml
+    sed -i "s|<!-- ### configured repositories ### -->|${repo}|" ${DAAS_HOME}/.m2/settings.xml
 
 
     local pluginRepo="\n\
@@ -176,7 +176,7 @@ function _add_maven_repo() {
                 </pluginRepository>\n\
                 <!-- ### configured plugin repositories ### -->"
 
-    sed -i "s|<!-- ### configured plugin repositories ### -->|${pluginRepo}|" $HOME/.m2/settings.xml
+    sed -i "s|<!-- ### configured plugin repositories ### -->|${pluginRepo}|" ${DAAS_HOME}/.m2/settings.xml
 }
 
 # Finds the environment variable  and returns its value if found.

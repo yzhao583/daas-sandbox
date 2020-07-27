@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+exec /home/daas/launch/launch-executor.sh run
