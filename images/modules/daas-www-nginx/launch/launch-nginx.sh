@@ -18,19 +18,6 @@ CONFIGURE_SCRIPTS=(
 source ${DAAS_HOME}/launch/configure.sh
 #############################################
 
-log_info "Launching httpd..."
-/usr/sbin/httpd
+log_info "Launching nginx..."
 
-http_ok() {
-    local http_code=$(curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:${HTTP_PORT:-8080}/")
-    if [ "${http_code}" = "200" ]; then
-        return 0
-    else
-        log_error "http response code is ${http_code}"
-        return 1
-    fi
-}
-
-while $(http_ok) ; do
-    sleep 1000
-done
+exec /usr/sbin/nginx -c ${DAAS_HOME}/launch/nginx.conf

@@ -18,5 +18,6 @@ CONFIGURE_SCRIPTS=(
 source ${DAAS_HOME}/launch/configure.sh
 #############################################
 
-log_info "Launching nginx..."
-/usr/sbin/nginx -c ${DAAS_HOME}/launch/nginx.conf
+log_info "Launching httpd..."
+
+exec /usr/sbin/httpd -DFOREGROUND
