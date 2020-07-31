@@ -34,19 +34,18 @@ source ${DAAS_HOME}/launch/configure.sh
 assemble_executor() {
     log_info "Building executor..."
 
-    local app_name="${APPLICATION_NAME:-myapp}"
+    local applications_dir=${DAAS_HOME}/applications
+    mkdir ${applications_dir}
+    cd ${applications_dir}
 
-    local app_group_id="${APPLICATION_GROUP_ID:-org.kie.daas.application}"
-    local app_group_path=$(echo ${app_group_id} | sed 's,\.,/,g')
-    local app_artifact_id="${APPLICATION_ARTIFACT_ID:-${app_name}}"
-    local app_version="${APPLICATION_VERSION:-1.0}"
+    local application_name="${APPLICATION_NAME:-myapp}"
+
+    local project_group_id="${APPLICATION_GROUP_ID:-org.kie.daas.application}"
+    local project_artifact_id="${APPLICATION_ARTIFACT_ID:-${application_name}}"
+    local project_version="${APPLICATION_VERSION:-1.0}"
 
     local kogito_version="${KOGITO_VERSION:-0.12.0}"
-
     local m2_dir=${DAAS_HOME}/.m2
-    local apps_dir=${DAAS_HOME}/apps
-    mkdir ${apps_dir}
-    cd ${apps_dir}
 
     mvn -e \
         archetype:generate \
@@ -55,24 +54,44 @@ assemble_executor() {
         -DarchetypeGroupId=org.kie.kogito \
         -DarchetypeArtifactId=kogito-quarkus-archetype \
         -DarchetypeVersion=${kogito_version} \
-        -DgroupId=${app_group_id} \
-        -DartifactId=${app_artifact_id} \
-        -Dversion=${app_version}
+        -DgroupId=${project_group_id} \
+        -DartifactId=${project_artifact_id} \
+        -Dversion=${project_version}
 
-    if [ "${app_artifact_id}" != "${app_name}" ]; then
-        mv "${app_artifact_id}" "${app_name}"
+    if [ "${project_artifact_id}" != "${application_name}" ]; then
+        mv "${project_artifact_id}" "${application_name}"
     fi
-
-    local app_dir=${apps_dir}/${app_name}
-    cd ${app_dir}
+    cd ${application_name}
 
     sed -i 's/localhost/0.0.0.0/g' src/main/resources/application.properties
     rm -f src/main/resources/*.bpmn*
     rm -f src/main/resources/*.dmn
-    rm -f src/test/java/${app_group_path}/*.java
+    rm -rf src/test/java/*
+    rm -rf target
 
-    cat <<EOF > src/main/resources/${app_name}.dmn
-<dmn:definitions xmlns:dmn="http://www.omg.org/spec/DMN/20180521/MODEL/" xmlns="https://kiegroup.org/dmn/${app_name}" xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/" xmlns:kie="http://www.drools.org/kie/dmn/1.2" xmlns:dmndi="http://www.omg.org/spec/DMN/20180521/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:feel="http://www.omg.org/spec/DMN/20180521/FEEL/" id="${app_name}" name="${app_name}" typeLanguage="http://www.omg.org/spec/DMN/20180521/FEEL/" namespace="https://kiegroup.org/dmn/${app_name}">
+    local builds_dir=${DAAS_HOME}/builds
+    local build_dir=${builds_dir}/${application_name}
+    mkdir -p ${build_dir}
+    local target_dir=${build_dir}/target
+
+    # TODO: figure out why we can't do this
+    # sed -i "s,^  <build>,  <build>\n    <directory>${target_dir}</directory>," pom.xml
+
+    local uuid_dmn_ns=$(uuidgen); uuid_dmn_ns=${uuid_dmn_ns^^}
+    local uuid_dmn_id=$(uuidgen); uuid_dmn_id=${uuid_dmn_id^^}
+    cat <<EOF > src/main/resources/${application_name}.dmn
+<dmn:definitions
+    xmlns:dmn="http://www.omg.org/spec/DMN/20180521/MODEL/"
+    xmlns="https://kiegroup.org/dmn/_${uuid_dmn_ns}"
+    xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/"
+    xmlns:kie="http://www.drools.org/kie/dmn/1.2"
+    xmlns:dmndi="http://www.omg.org/spec/DMN/20180521/DMNDI/"
+    xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+    xmlns:feel="http://www.omg.org/spec/DMN/20180521/FEEL/"
+    id="_${uuid_dmn_id}"
+    name="${application_name}"
+    typeLanguage="http://www.omg.org/spec/DMN/20180521/FEEL/"
+    namespace="https://kiegroup.org/dmn/_${uuid_dmn_ns}">
   <dmn:extensionElements/>
   <dmndi:DMNDI>
     <dmndi:DMNDiagram>
@@ -85,11 +104,11 @@ assemble_executor() {
 EOF
 
     mvn -e \
+        dependency:resolve \
         dependency:resolve-plugins \
         dependency:go-offline \
         clean \
         compile \
-        package \
         -f pom.xml \
         -s ${m2_dir}/settings.xml \
         --batch-mode \
@@ -97,39 +116,53 @@ EOF
         -Dfabric8.skip=true \
         -Dfindbugs.skip=true \
         -Djacoco.skip=true \
+        -DincludeScope=test \
         -Dmaven.javadoc.skip=true \
         -Dmaven.site.skip=true \
         -Dmaven.source.skip=true \
         -Dmaven.test.skip \
         -Dpmd.skip=true \
         -DskipTests
-        # --no-transfer-progress \
 
-    # TODO: keep target dir out of the shared webdav volume
-    # rm -rf target
-    # local target_dir=${DAAS_HOME}/builds/${app_name}/target
-    # sed -i "s,^  <build>,  <build>\n    <directory>${target_dir}</directory>," pom.xml
+    # mkdir -p ${target_dir}/classes
+    # cp pom.xml ${target_dir}/classes
+
+    for D in ${applications_dir} ${builds_dir} ${m2_dir} ; do
+        chmod -R 777 ${D}
+    done
 }
 
 run_executor() {
     log_info "Launching executor..."
 
-    local m2_dir=${DAAS_HOME}/.m2
-    local app_name=${APPLICATION_NAME:-myapp}
-
-    local app_dir=${DAAS_HOME}/apps/${app_name}
-    local dav_dir=${WEBDAV_MOUNT_PATH:-/var/www/webdav}/${app_name}
+    local application_name=${APPLICATION_NAME:-myapp}
+    local application_dir=${DAAS_HOME}/applications/${application_name}
+    local dav_dir=${WEBDAV_MOUNT_PATH:-/var/www/webdav}/${application_name}
 
     if [ ! -d "${dav_dir}" ] ; then
-        cp -v -r ${app_dir} ${dav_dir}
+        cp -v -r ${application_dir} ${dav_dir}
     fi
     cd ${dav_dir}
 
+    local m2_dir=${DAAS_HOME}/.m2
     exec mvn -e \
         compile \
         quarkus:dev \
         -f pom.xml \
-        -s ${m2_dir}/settings.xml
+        -s ${m2_dir}/settings.xml \
+        -Ddebug=false \
+        -Dmaven.test.skip \
+        -DnoDeps \
+        -Dquarkus.http.host=0.0.0.0 \
+        -Dquarkus.http.port=${HTTP_PORT:-8080} \
+        -DskipTests \
+        --no-transfer-progress
+
+    # exec mvn -e -o \
+        # clean \
+        # -Djava.library.path=${DAAS_HOME}/ssl-libs \
+        # -Djavax.net.ssl.trustStore=${DAAS_HOME}/cacerts \
+        # -Dquarkus-bootstrap-offline=true \
 }
 
 #############################################
