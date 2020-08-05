@@ -34,14 +34,15 @@ source ${DAAS_HOME}/launch/configure.sh
 assemble_executor() {
     log_info "Building executor..."
 
-    local applications_dir=${DAAS_HOME}/applications
-    mkdir ${applications_dir}
-    cd ${applications_dir}
+    local app_name="${APPLICATION_NAME:-myapp}"
+    local app_dir=${APPLICATION_PATH:-${DAAS_HOME}/apps/${app_name}}
 
-    local application_name="${APPLICATION_NAME:-myapp}"
+    local apps_dir=$(dirname ${app_dir})
+    mkdir -p ${apps_dir}
+    cd ${apps_dir}
 
     local project_group_id="${APPLICATION_GROUP_ID:-org.kie.daas.application}"
-    local project_artifact_id="${APPLICATION_ARTIFACT_ID:-${application_name}}"
+    local project_artifact_id="${APPLICATION_ARTIFACT_ID:-${app_name}}"
     local project_version="${APPLICATION_VERSION:-1.0}"
 
     local kogito_version="${KOGITO_VERSION:-0.12.0}"
@@ -58,28 +59,14 @@ assemble_executor() {
         -DartifactId=${project_artifact_id} \
         -Dversion=${project_version}
 
-    if [ "${project_artifact_id}" != "${application_name}" ]; then
-        mv "${project_artifact_id}" "${application_name}"
+    if [ "${project_artifact_id}" != "${app_name}" ]; then
+        mv "${project_artifact_id}" "${app_name}"
     fi
-    cd ${application_name}
-
-    sed -i 's/localhost/0.0.0.0/g' src/main/resources/application.properties
-    rm -f src/main/resources/*.bpmn*
-    rm -f src/main/resources/*.dmn
-    rm -rf src/test/java/*
-    rm -rf target
-
-    local builds_dir=${DAAS_HOME}/builds
-    local build_dir=${builds_dir}/${application_name}
-    mkdir -p ${build_dir}
-    local target_dir=${build_dir}/target
-
-    # TODO: figure out why we can't do this
-    # sed -i "s,^  <build>,  <build>\n    <directory>${target_dir}</directory>," pom.xml
+    cd ${app_name}
 
     local uuid_dmn_ns=$(uuidgen); uuid_dmn_ns=${uuid_dmn_ns^^}
     local uuid_dmn_id=$(uuidgen); uuid_dmn_id=${uuid_dmn_id^^}
-    cat <<EOF > src/main/resources/${application_name}.dmn
+    cat <<EOF > src/main/resources/${app_name}.dmn
 <dmn:definitions
     xmlns:dmn="http://www.omg.org/spec/DMN/20180521/MODEL/"
     xmlns="https://kiegroup.org/dmn/_${uuid_dmn_ns}"
@@ -89,7 +76,7 @@ assemble_executor() {
     xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
     xmlns:feel="http://www.omg.org/spec/DMN/20180521/FEEL/"
     id="_${uuid_dmn_id}"
-    name="${application_name}"
+    name="${app_name}"
     typeLanguage="http://www.omg.org/spec/DMN/20180521/FEEL/"
     namespace="https://kiegroup.org/dmn/_${uuid_dmn_ns}">
   <dmn:extensionElements/>
@@ -109,6 +96,8 @@ EOF
         dependency:go-offline \
         clean \
         compile \
+        test \
+        package \
         -f pom.xml \
         -s ${m2_dir}/settings.xml \
         --batch-mode \
@@ -120,32 +109,43 @@ EOF
         -Dmaven.javadoc.skip=true \
         -Dmaven.site.skip=true \
         -Dmaven.source.skip=true \
-        -Dmaven.test.skip \
-        -Dpmd.skip=true \
-        -DskipTests
+        -Dpmd.skip=true
 
-    # mkdir -p ${target_dir}/classes
-    # cp pom.xml ${target_dir}/classes
+    sed -i 's/localhost/0.0.0.0/g' src/main/resources/application.properties
+    rm -f src/main/resources/*.bpmn*
+    rm -rf src/test/java/*
+    rm -rf /tmp/vertx-cache
 
-    for D in ${applications_dir} ${builds_dir} ${m2_dir} ; do
+    for D in ${app_dir} ${m2_dir} ; do
         chmod -R 777 ${D}
     done
+
+    # NOTE: "resources" is the mount point, so move s2i items out of the way (see below)
+    mv ${app_dir}/src/main/resources ${app_dir}/src/main/resources.s2i
 }
 
 run_executor() {
     log_info "Launching executor..."
 
-    local application_name=${APPLICATION_NAME:-myapp}
-    local application_dir=${DAAS_HOME}/applications/${application_name}
-    local dav_dir=${WEBDAV_MOUNT_PATH:-/var/www/webdav}/${application_name}
+    local app_name="${APPLICATION_NAME:-myapp}"
+    local app_dir=${APPLICATION_PATH:-${DAAS_HOME}/apps/${app_name}}
 
-    if [ ! -d "${dav_dir}" ] ; then
-        cp -v -r ${application_dir} ${dav_dir}
-    fi
-    cd ${dav_dir}
+    # NOTE: "resources" is the mount point, so move s2i items back if needed (see above)
+    local res_dir=${app_dir}/src/main/resources
+    local res_s2i_dir=${res_dir}.s2i
+    cd ${res_s2i_dir}
+    for R in $(ls) ; do
+        if [ ! -e "${res_dir}/${R}" ]; then
+            mv ${R} ${res_dir}
+        fi
+    done
+    cd ${app_dir}
+    rm -rf ${res_s2i_dir}
 
+    cd ${app_dir}
     local m2_dir=${DAAS_HOME}/.m2
-    exec mvn -e \
+    exec mvn -e -o \
+        clean \
         compile \
         quarkus:dev \
         -f pom.xml \
@@ -155,14 +155,11 @@ run_executor() {
         -DnoDeps \
         -Dquarkus.http.host=0.0.0.0 \
         -Dquarkus.http.port=${HTTP_PORT:-8080} \
-        -DskipTests \
-        --no-transfer-progress
+        -DskipTests
 
-    # exec mvn -e -o \
-        # clean \
         # -Djava.library.path=${DAAS_HOME}/ssl-libs \
         # -Djavax.net.ssl.trustStore=${DAAS_HOME}/cacerts \
-        # -Dquarkus-bootstrap-offline=true \
+        # --no-transfer-progress
 }
 
 #############################################

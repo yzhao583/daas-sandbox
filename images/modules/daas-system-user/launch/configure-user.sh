@@ -8,4 +8,5 @@ configure() {
         cat /tmp/passwd > /etc/passwd
         rm /tmp/passwd
     fi
+    umask 002
 }
