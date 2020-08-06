@@ -1,8 +1,8 @@
 schema_version: 1
 
-name: "org.kie.daas.www.httpd"
+name: "org.kie.daas.service.modeler"
 version: "0.1"
-description: "KIE DaaS www httpd module"
+description: "KIE DaaS service modeler module"
 
 labels:
   - name: "io.openshift.expose-services"

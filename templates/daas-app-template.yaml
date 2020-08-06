@@ -37,6 +37,13 @@ parameters:
     description: A named pointer to an image in an image stream. Default is '0.1'.
     value: '0.1'
     required: true
+  - name: DAAS_MODELER_IMAGE_STREAM_NAME
+    displayName: DaaS Modeler ImageStream Name
+    description: >-
+      The name of the image stream to use for DaaS Modeler. Default is
+      'daas-modeler-ubi8'.
+    value: daas-modeler-ubi8
+    required: true
   - name: DAAS_ACCEPTOR_IMAGE_STREAM_NAME
     displayName: DaaS Acceptor ImageStream Name
     description: >-
@@ -58,6 +65,13 @@ parameters:
       'daas-executor-ubi8-s2i'.
     value: daas-executor-ubi8-s2i
     required: true
+  - name: DAAS_MODELER_HOSTNAME_HTTP
+    displayName: Daas Modeler Custom http Route Hostname
+    description: >-
+      Custom hostname for DaaS Modeler http service route. Leave blank for
+      default hostname, e.g.:
+      '<application-name>-modeler-<project>.<default-domain-suffix>'
+    value: ''
   - name: DAAS_ACCEPTOR_HOSTNAME_HTTP
     displayName: Daas Acceptor Custom http Route Hostname
     description: >-
@@ -125,6 +139,26 @@ objects:
           port: 8080
           targetPort: 8080
       selector:
+        deploymentConfig: '${APPLICATION_NAME}-daas-modeler'
+      sessionAffinity: ClientIP
+      sessionAffinityConfig:
+        clientIP:
+          timeoutSeconds: 3600
+    metadata:
+      name: '${APPLICATION_NAME}-daas-modeler'
+      labels:
+        application: '${APPLICATION_NAME}'
+        service: '${APPLICATION_NAME}-daas-modeler'
+      annotations:
+        description: The DaaS modeler web server ports.
+  - kind: Service
+    apiVersion: v1
+    spec:
+      ports:
+        - name: http
+          port: 8080
+          targetPort: 8080
+      selector:
         deploymentConfig: '${APPLICATION_NAME}-daas-acceptor'
       sessionAffinity: ClientIP
       sessionAffinityConfig:
@@ -159,6 +193,23 @@ objects:
         description: The DaaS executor web server ports.
   - kind: Route
     apiVersion: v1
+    id: '${APPLICATION_NAME}-daas-modeler-http'
+    metadata:
+      name: '${APPLICATION_NAME}-daas-modeler'
+      labels:
+        application: '${APPLICATION_NAME}'
+        service: '${APPLICATION_NAME}-daas-modeler'
+      annotations:
+        description: Route for DaaS modeler's http service.
+        haproxy.router.openshift.io/balance: source
+    spec:
+      host: '${DAAS_MODELER_HOSTNAME_HTTP}'
+      to:
+        name: '${APPLICATION_NAME}-daas-modeler'
+      port:
+        targetPort: http
+  - kind: Route
+    apiVersion: v1
     id: '${APPLICATION_NAME}-daas-acceptor-http'
     metadata:
       name: '${APPLICATION_NAME}-daas-acceptor'
@@ -186,7 +237,7 @@ objects:
         description: Route for DaaS executor's http service.
         haproxy.router.openshift.io/balance: source
     spec:
-      host: '${DAAS_ACCEPTOR_HOSTNAME_HTTP}'
+      host: '${DAAS_EXECUTOR_HOSTNAME_HTTP}'
       to:
         name: '${APPLICATION_NAME}-daas-executor'
       port:
@@ -234,6 +285,57 @@ objects:
         - type: ImageChange
           imageChange: {}
         - type: ConfigChange
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: '${APPLICATION_NAME}-daas-modeler'
+      labels:
+        application: '${APPLICATION_NAME}'
+        service: '${APPLICATION_NAME}-daas-modeler'
+      annotations:
+        template.alpha.openshift.io/wait-for-ready: 'true'
+    spec:
+      revisionHistoryLimit: 10
+      strategy:
+        type: Rolling
+        rollingParams:
+          maxSurge: 100%
+          maxUnavailable: 0
+      triggers:
+        - type: ImageChange
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - '${APPLICATION_NAME}-daas-modeler'
+            from:
+              kind: ImageStreamTag
+              namespace: '${IMAGE_STREAM_NAMESPACE}'
+              name: '${DAAS_MODELER_IMAGE_STREAM_NAME}:${IMAGE_STREAM_TAG}'
+        - type: ConfigChange
+      replicas: 1
+      selector:
+        deploymentConfig: '${APPLICATION_NAME}-daas-modeler'
+      template:
+        metadata:
+          name: '${APPLICATION_NAME}-daas-modeler'
+          labels:
+            deploymentConfig: '${APPLICATION_NAME}-daas-modeler'
+            application: '${APPLICATION_NAME}'
+            service: '${APPLICATION_NAME}-daas-modeler'
+        spec:
+          serviceAccountName: '${APPLICATION_NAME}-daas-svcacct'
+          terminationGracePeriodSeconds: 60
+          containers:
+            - name: '${APPLICATION_NAME}-daas-modeler'
+              image: '${DAAS_MODELER_IMAGE_STREAM_NAME}'
+              imagePullPolicy: Always
+              ports:
+                - name: http
+                  containerPort: 8080
+                  protocol: TCP
+              env:
+                - name: SCRIPT_DEBUG
+                  value: '${SCRIPT_DEBUG}'
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:

@@ -1,8 +1,8 @@
 schema_version: 1
 
-name: "org.kie.daas.www.nginx"
+name: "org.kie.daas.service.acceptor"
 version: "0.1"
-description: "KIE DaaS www nginx module"
+description: "KIE DaaS service acceptor module"
 
 labels:
   - name: "io.openshift.expose-services"
@@ -10,7 +10,7 @@ labels:
 
 packages:
   install:
-    - nginx
+    - httpd
 
 ports:
     - value: 8080

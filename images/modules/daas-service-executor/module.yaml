@@ -8,5 +8,8 @@ labels:
   - name: "io.openshift.expose-services"
     value: "8080:http"
 
+ports:
+    - value: 8080
+
 execute:
   - script: "module.sh"

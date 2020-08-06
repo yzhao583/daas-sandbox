@@ -9,10 +9,10 @@ usage() {
     echo ""
     echo "  Usage: image.sh [name] [action] [engine] [port]"
     echo ""
-    echo "   name: the (abbreviated) image name"
+    echo "   name: the (abbreviated) image name (modeler, acceptor, executor)"
     echo " action: can be one of... build, shell, run, kill"
     echo " engine: for build action, default is 'buildah'; for shell, run, or kill actions, default is 'podman'"
-    echo "   port: default is 8080 for acceptor, otherwise empty"
+    echo "   port: default is 8080 for modeler or acceptor, otherwise empty"
     echo ""
     echo "Example: ./image.sh acceptor build"
     echo ""
@@ -33,8 +33,10 @@ main() {
         echo "name required"
         usage
         return 1
-    elif [ "${name}" = "acceptor" ] && [ "${port}" = "" ] ; then
-        port="8080"
+    elif [ "${port}" = "" ] ; then
+        if [ "${name}" = "modeler" ] || [ "${name}" = "acceptor" ] ; then
+            port="8080"
+        fi
     fi
 
     name="daas-${name}-ubi8"

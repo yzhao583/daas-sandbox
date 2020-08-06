@@ -1,17 +1,17 @@
 schema_version: 1
 
-name: quay.io/kiegroup/daas-acceptor-ubi8
+name: quay.io/kiegroup/daas-modeler-ubi8
 from: 'registry.access.redhat.com/ubi8/ubi-minimal:8.0'
 version: '0.1'
-description: KIE DaaS Acceptor
+description: KIE DaaS Modeler
 
 labels:
   - name: io.k8s.display-name
-    value: KIE DaaS Acceptor
+    value: KIE DaaS Modeler
   - name: io.k8s.description
-    value: KIE DaaS Acceptor
+    value: KIE DaaS Modeler
   - name: io.openshift.tags
-    value: 'daas,acceptor'
+    value: 'daas,modeler'
 
 packages:
   manager: microdnf
@@ -21,11 +21,11 @@ modules:
     - path: modules
   install:
     - name: org.kie.daas.common.modules
-    - name: org.kie.daas.service.acceptor
+    - name: org.kie.daas.service.modeler
     - name: org.kie.daas.common.cleanup
 
 run:
   workdir: /home/daas
   user: 1001
   cmd:
-    - /home/daas/launch/launch-acceptor.sh
+    - /home/daas/launch/launch-modeler.sh

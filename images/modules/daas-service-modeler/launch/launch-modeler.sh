@@ -18,6 +18,6 @@ CONFIGURE_SCRIPTS=(
 source ${DAAS_HOME}/launch/configure.sh
 #############################################
 
-log_info "Launching httpd..."
+log_info "Launching modeler..."
 
 exec /usr/sbin/httpd -DFOREGROUND
