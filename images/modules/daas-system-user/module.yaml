@@ -14,5 +14,9 @@ envs:
   - name: "USER"
     value: "daas"
 
+packages:
+  install:
+    - shadow-utils
+
 execute:
   - script: "module.sh"

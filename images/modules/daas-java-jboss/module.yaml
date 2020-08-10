@@ -10,5 +10,9 @@ envs:
   - name: "JBOSS_USER"
     value: "jboss"
 
+packages:
+  install:
+    - shadow-utils
+
 execute:
   - script: "module.sh"

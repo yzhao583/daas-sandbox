@@ -4,8 +4,8 @@ name: "org.kie.daas.system.packages"
 version: "0.1"
 description: "KIE DaaS system packages module"
 
-# TODO: remove unnecessary packages
-#       (findutils, procps-ng, vim-minimal, which, ...)
+# TODO: remove unnecessary packages, depending on which image
+#       (findutils, git, procps-ng, vim-minimal, which, ...)
 packages:
   install:
     - file
@@ -13,7 +13,6 @@ packages:
     - git
     - gzip
     - procps-ng
-    - shadow-utils
     - tar
     - vim-minimal
     - which

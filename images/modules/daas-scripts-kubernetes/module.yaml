@@ -1,0 +1,12 @@
+schema_version: 1
+
+name: "org.kie.daas.scripts.kubernetes"
+version: "0.1"
+description: "KIE DaaS scripts kubernetes module"
+
+packages:
+  install:
+    - python36
+
+execute:
+  - script: "module.sh"

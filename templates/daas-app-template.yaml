@@ -334,6 +334,16 @@ objects:
                   containerPort: 8080
                   protocol: TCP
               env:
+                - name: APPLICATION_NAME
+                  value: '${APPLICATION_NAME}'
+                - name: DAAS_ACCEPTOR_ROUTE_NAME
+                  value: '${APPLICATION_NAME}-daas-acceptor'
+                - name: DAAS_ACCEPTOR_HOSTNAME_HTTP
+                  value: '${DAAS_ACCEPTOR_HOSTNAME_HTTP}'
+                - name: DAAS_EXECUTOR_ROUTE_NAME
+                  value: '${APPLICATION_NAME}-daas-executor'
+                - name: DAAS_EXECUTOR_HOSTNAME_HTTP
+                  value: '${DAAS_EXECUTOR_HOSTNAME_HTTP}'
                 - name: SCRIPT_DEBUG
                   value: '${SCRIPT_DEBUG}'
   - kind: DeploymentConfig
@@ -447,12 +457,12 @@ objects:
               env:
                 - name: APPLICATION_NAME
                   value: '${APPLICATION_NAME}'
+                - name: APPLICATION_PATH
+                  value: '/home/daas/apps/${APPLICATION_NAME}'
                 - name: MAVEN_MIRROR_URL
                   value: '${MAVEN_MIRROR_URL}'
                 - name: SCRIPT_DEBUG
                   value: '${SCRIPT_DEBUG}'
-                - name: APPLICATION_PATH
-                  value: '/home/daas/apps/${APPLICATION_NAME}'
               volumeMounts:
                 - name: '${APPLICATION_NAME}-daas-webdav-pvol'
                   mountPath: '/home/daas/apps/${APPLICATION_NAME}/src/main/resources'

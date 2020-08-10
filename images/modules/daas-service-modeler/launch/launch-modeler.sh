@@ -14,6 +14,7 @@ fi
 # config (any configurations script that needs to run on image startup must be added here)
 CONFIGURE_SCRIPTS=(
     ${DAAS_HOME}/launch/configure-user.sh
+    ${DAAS_HOME}/launch/kubernetes-client.sh
 )
 source ${DAAS_HOME}/launch/configure.sh
 #############################################

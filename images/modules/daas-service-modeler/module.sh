@@ -10,6 +10,8 @@ install_module() {
 
     mkdir -p /var/www/html
     # cp -v -r ${SCRIPT_DIR}/www/* /var/www/html
+
+    # kogito online modeler
     git clone --single-branch --branch gh-pages https://github.com/kiegroup/kogito-online.git
     mv kogito-online/* /var/www/html
     rm -rf kogito-online

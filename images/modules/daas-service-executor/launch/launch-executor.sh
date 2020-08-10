@@ -64,21 +64,22 @@ assemble_executor() {
     fi
     cd ${app_name}
 
-    local uuid_dmn_ns=$(uuidgen); uuid_dmn_ns=${uuid_dmn_ns^^}
-    local uuid_dmn_id=$(uuidgen); uuid_dmn_id=${uuid_dmn_id^^}
+    local app_ns=$(uuidgen); app_ns=${app_ns^^}
+    # local app_id=$(uuidgen); app_id=${app_id^^}
+    local app_id=${app_name}
     cat <<EOF > src/main/resources/${app_name}.dmn
 <dmn:definitions
     xmlns:dmn="http://www.omg.org/spec/DMN/20180521/MODEL/"
-    xmlns="https://kiegroup.org/dmn/_${uuid_dmn_ns}"
+    xmlns="https://kiegroup.org/dmn/_${app_ns}"
     xmlns:di="http://www.omg.org/spec/DMN/20180521/DI/"
     xmlns:kie="http://www.drools.org/kie/dmn/1.2"
     xmlns:dmndi="http://www.omg.org/spec/DMN/20180521/DMNDI/"
     xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
     xmlns:feel="http://www.omg.org/spec/DMN/20180521/FEEL/"
-    id="_${uuid_dmn_id}"
+    id="${app_id}"
     name="${app_name}"
     typeLanguage="http://www.omg.org/spec/DMN/20180521/FEEL/"
-    namespace="https://kiegroup.org/dmn/_${uuid_dmn_ns}">
+    namespace="https://kiegroup.org/dmn/_${app_ns}">
   <dmn:extensionElements/>
   <dmndi:DMNDI>
     <dmndi:DMNDiagram>
